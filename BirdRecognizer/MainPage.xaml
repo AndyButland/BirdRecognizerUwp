@@ -1,0 +1,16 @@
+﻿<Page
+    x:Class="BirdRecognizer.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:BirdRecognizer"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Image x:Name="Image" HorizontalAlignment="Left" Height="535" Margin="105,216,0,0" VerticalAlignment="Top" Width="427"/>
+        <Button x:Name="Button" Content="Get Prediction" HorizontalAlignment="Left" Margin="663,216,0,0" VerticalAlignment="Top" Height="82" Width="357" Click="ButtonClick"/>
+        <TextBlock x:Name="TextBlock" HorizontalAlignment="Left" Margin="663,341,0,0" Text="TextBlock" TextWrapping="Wrap" VerticalAlignment="Top" Width="491" Height="73"/>
+    </Grid>
+</Page>
