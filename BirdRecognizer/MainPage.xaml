@@ -8,9 +8,9 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
-        <Image x:Name="Image" HorizontalAlignment="Left" Height="535" Margin="105,216,0,0" VerticalAlignment="Top" Width="427"/>
-        <Button x:Name="Button" Content="Get Prediction" HorizontalAlignment="Left" Margin="663,216,0,0" VerticalAlignment="Top" Height="82" Width="357" Click="ButtonClick"/>
-        <TextBlock x:Name="TextBlock" HorizontalAlignment="Left" Margin="663,341,0,0" Text="TextBlock" TextWrapping="Wrap" VerticalAlignment="Top" Width="491" Height="73"/>
-    </Grid>
+    <StackPanel>
+        <Button x:Name="Button" Content="Select image..." Width="800" Height="40" Click="ButtonClick"/>
+        <Image x:Name="Image" HorizontalAlignment="Left" Width="800" />
+        <TextBlock x:Name="TextBlock" Text="" TextWrapping="Wrap" HorizontalAlignment="Left" Width="800" Height="40" Padding="10" />
+    </StackPanel>
 </Page>

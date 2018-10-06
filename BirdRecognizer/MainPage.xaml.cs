@@ -5,6 +5,7 @@
     using Windows.Graphics.Imaging;
     using Windows.Media;
     using Windows.Storage;
+    using Windows.Storage.Pickers;
     using Windows.UI.Xaml;
     using Windows.UI.Xaml.Controls;
     using Windows.UI.Xaml.Media.Imaging;
@@ -12,7 +13,7 @@
 
     public sealed partial class MainPage : Page
     {
-        private BirdRecognizerModel _model;
+        private CatOrDogModel _model;
 
         public MainPage()
         {
@@ -26,9 +27,10 @@
 
         private async Task LoadModel()
         {
-            const string ModelPath = "ms-appx:///BirdRecognizerModel.onnx";
-            var file = await StorageFile.GetFileFromApplicationUriAsync(new Uri(ModelPath));
-            _model = await BirdRecognizerModel.CreateModel(file);
+            const string ModelPath = "ms-appx:///CatOrDogModel.onnx";
+            var modelUri = new Uri(ModelPath);
+            var file = await StorageFile.GetFileFromApplicationUriAsync(modelUri);
+            _model = await CatOrDogModel.CreateCatOrDogModel(file);
         }
 
         private async void ButtonClick(object sender, RoutedEventArgs e)
@@ -38,20 +40,44 @@
 
         private async Task GetPredictionFromImage()
         {
-            // TODO: get from picker (see: https://blogs.msdn.microsoft.com/appconsult/2018/05/23/add-a-bit-of-machine-learning-to-your-windows-application-thanks-to-winml/)
-            const string TestFile = "ms-appx:///Assets/blue-tit-test.jpg";
-            var storageFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri(TestFile));
-            var softwareBitmap = await GetSoftwareBitmap(storageFile);
+            var storageFile = await GetFileForClassification();
+
+            var softwareBitmap = await ConvertToSoftwareBitmap(storageFile);
 
             await ShowImage(softwareBitmap);
 
-            var videoFrame = VideoFrame.CreateWithSoftwareBitmap(softwareBitmap);
-            var input = new BirdRecognizerModelInput
+            var videoFrame = ConvertToVideoFrame(softwareBitmap);
+            var input = new CatOrDogModelInput
                 {
                     data = videoFrame
                 };
             var output = await _model.EvaluateAsync(input);
-            TextBlock.Text = output.classLabel[0];
+
+            ShowPredictionResult(output);
+        }
+
+        private static async Task<StorageFile> GetFileForClassification()
+        {
+            var fileOpenPicker = new FileOpenPicker
+                {
+                    SuggestedStartLocation = PickerLocationId.PicturesLibrary
+                };
+            fileOpenPicker.FileTypeFilter.Add(".bmp");
+            fileOpenPicker.FileTypeFilter.Add(".jpg");
+            fileOpenPicker.FileTypeFilter.Add(".png");
+            fileOpenPicker.ViewMode = PickerViewMode.Thumbnail;
+            return await fileOpenPicker.PickSingleFileAsync();
+        }
+
+        private static async Task<SoftwareBitmap> ConvertToSoftwareBitmap(IStorageFile file)
+        {
+            using (var stream = await file.OpenAsync(FileAccessMode.Read))
+            {
+                var decoder = await BitmapDecoder.CreateAsync(stream);
+
+                var softwareBitmap = await decoder.GetSoftwareBitmapAsync();
+                return SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
+            }
         }
 
         private async Task ShowImage(SoftwareBitmap softwareBitmap)
@@ -61,15 +87,14 @@
             Image.Source = imageSource;
         }
 
-        private static async Task<SoftwareBitmap> GetSoftwareBitmap(IStorageFile file)
+        private static VideoFrame ConvertToVideoFrame(SoftwareBitmap softwareBitmap)
         {
-            using (var stream = await file.OpenAsync(FileAccessMode.Read))
-            {
-                var decoder = await BitmapDecoder.CreateAsync(stream);
+            return VideoFrame.CreateWithSoftwareBitmap(softwareBitmap);
+        }
 
-                var softwareBitmap = await decoder.GetSoftwareBitmapAsync();
-                return SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
-            }
+        private void ShowPredictionResult(CatOrDogModelOutput output)
+        {
+            TextBlock.Text = "Image contains: " + output.classLabel[0];
         }
     }
 }
